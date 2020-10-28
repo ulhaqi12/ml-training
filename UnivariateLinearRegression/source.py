@@ -8,8 +8,8 @@ class Model:
     def __init__(self, weight=np.random.randn(), bias=np.random.randn()):
         """
         Constructor to create one model object that will perform univariate linear regression
-        :param weight:
-        :param bias:
+        :param weight: model parameter
+        :param bias: bias parameter
         """
 
         self.w = weight
@@ -18,8 +18,8 @@ class Model:
     def predict(self, x):
         """
         function that will take input x and compute output y.
-        :param x:
-        :return y:
+        :param x: input data
+        :return y: predicted output
         """
 
         y = self.w * x + self.b
@@ -28,10 +28,10 @@ class Model:
     def optimize(self, x, y, outputs, learning_rate=0.05):
         """
         function that will perform one optimization step.
-        :param x:
-        :param y:
-        :param outputs:
-        :param learning_rate:
+        :param x: input data
+        :param y: expected outputs
+        :param outputs: predicted outputs
+        :param learning_rate: learning rate that will decide how fast model will learn
         :return:
         """
         self.b = self.b - (learning_rate * (np.sum(outputs - y)/len(y)))
@@ -41,8 +41,8 @@ class Model:
 def r_squared_score(y, outputs):
     """
     function that will calculate R Squared score
-    :param actual output -> y:
-    :param pridicted output -> outputs:
+    :param y: expected outputs
+    :param outputs: predicted outputs
     :return:
     """
     y_avg = np.average(y)
@@ -55,9 +55,9 @@ def r_squared_score(y, outputs):
 def calculate_cost(y, output):
     """
     function that will calculate cost/error. It will use Mean Square Error(MSE) as it is simple regression problem
-    :param y:
-    :param output:
-    :return cost:
+    :param y: expected output
+    :param output: predicted output
+    :return cost: calculated coast or error
     """
 
     cost = np.sum(np.square(output - y))/(2 * len(y))
@@ -66,8 +66,8 @@ def calculate_cost(y, output):
 
 def normalize_input(x):
     """
-    funciton that will return normalized fetures
-    :param x:
+    function that will return normalized fetures
+    :param x: input data
     :return:
     """
     min_value = min(x)
@@ -115,6 +115,6 @@ if __name__ == '__main__':
 
     denormalized_outputs = outputs * (max_y - min_y) + min_y
     abline(model.w, model.b)
-    # plt.show()
+    plt.show()
 
     print('R Square score: ', r_squared_score(norm_y, denormalized_outputs))
