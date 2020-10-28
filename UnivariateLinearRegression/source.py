@@ -38,6 +38,20 @@ class Model:
         self.w = self.w - (learning_rate * (np.sum(np.multiply(outputs - y, x))/len(y)))
 
 
+def r_squared_score(y, outputs):
+    """
+    function that will calculate R Squared score
+    :param actual output -> y:
+    :param pridicted output -> outputs:
+    :return:
+    """
+    y_avg = np.average(y)
+    var_y = np.sum(np.square(outputs - y_avg))
+    mse = np.sum(np.square(outputs - y))
+    r_squared = 1 - (mse / var_y)
+    return r_squared
+
+
 def calculate_cost(y, output):
     """
     function that will calculate cost/error. It will use Mean Square Error(MSE) as it is simple regression problem
@@ -99,5 +113,8 @@ if __name__ == '__main__':
         cost = calculate_cost(norm_y, outputs)
         model.optimize(norm_x, norm_y, outputs)
 
+    denormalized_outputs = outputs * (max_y - min_y) + min_y
     abline(model.w, model.b)
-    plt.show()
+    # plt.show()
+
+    print('R Square score: ', r_squared_score(norm_y, denormalized_outputs))
