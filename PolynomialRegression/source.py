@@ -26,7 +26,7 @@ class Model:
         y = np.matmul(x.to_numpy(), self.w).reshape(x.shape[0],)
         return y
 
-    def optimize(self, x, y, outputs, learning_rate=0.05):
+    def optimize(self, x, y, outputs, learning_rate=0.005):
         """
         function that will perform one optimization step.
         :param x: input data
@@ -52,39 +52,19 @@ def calculate_cost(y, output):
     return cost
 
 
-def one_hot_encoding(input_data, column):
+def pre_processing_of_data(input_data, column, extend_count=0):
     """
-    function that will perform one-hot encoding on specific column
-    :param input_data: pandas dataframe of input data
-    :param column: column name for which on-hot encoding is required
-    :return pandas dataframe having one-hot encoded column:
-    """
-
-    unique_values = pd.unique(input_data[column])
-    for value in unique_values:
-        for i in range(len(input_data)):
-            input_data.loc[i, value] = 1 if input_data.loc[i, column] == value else 0
-    results = input_data.drop([column], axis=1)
-    return results
-
-
-def pre_processing_of_data(input_data):
-    """
-    function will perform pre processing of data including on hot encoding etc
+    function will perform pre processing of data
     :param input_data: input dataframe
     :return results: preprocessed data
     """
 
-    for i in range(len(input_data)):
-        input_data.loc[i, 'mainroad'] = 1 if input_data.loc[i, 'mainroad'] == 'yes' else 0
-        input_data.loc[i, 'guestroom'] = 1 if input_data.loc[i, 'guestroom'] == 'yes' else 0
-        input_data.loc[i, 'basement'] = 1 if input_data.loc[i, 'basement'] == 'yes' else 0
-        input_data.loc[i, 'hotwaterheating'] = 1 if input_data.loc[i, 'hotwaterheating'] == 'yes' else 0
-        input_data.loc[i, 'airconditioning'] = 1 if input_data.loc[i, 'airconditioning'] == 'yes' else 0
-        input_data.loc[i, 'prefarea'] = 1 if input_data.loc[i, 'prefarea'] == 'yes' else 0
+    for i in range(2, extend_count+2):
+        input_data.loc[:, column+str(i)] = input_data.loc[:, column] ** i
 
-    input_data = one_hot_encoding(input_data, 'furnishingstatus')
-    input_data = normalize(input_data, columns=['bedrooms', 'bathrooms', 'stories', 'parking', 'area'])
+    input_data = normalize(input_data, columns=input_data.columns)
+
+    print(input_data.head())
     return input_data
 
 
@@ -109,12 +89,13 @@ def normalize(input_data, columns):
 def abline(slope, intercept):
     """Plot a line from slope and intercept"""
     axes = plt.gca()
-    x_vals = np.array(axes.get_xlim())
-    y_vals = intercept + slope * x_vals
+    limits = np.array(axes.get_xlim())
+    x_vals = np.linspace(limits[0], limits[1], 100)
+    y_vals = intercept + ((slope[0][0] * x_vals) + (slope[1][0] * x_vals**2) + (slope[2][0] * x_vals**3))
     plt.plot(x_vals, y_vals, color='red')
 
 
-def plot_line_2d_using_pca(x, y, model):
+def plot_line(x, y, model):
     """
     function that will convert all data and weights in 2d using PCA and plot to get a 2d visualization.
     :param x: input data that will be converted to 1D will be on x axis
@@ -123,18 +104,10 @@ def plot_line_2d_using_pca(x, y, model):
     :return:
     """
 
-    pca = PCA(n_components=1)
-    pca_data = pca.fit_transform(x)
-
-    plt.scatter(pca_data, y)
-    plt.xlabel('14 different features converted to 1D using PCA')
+    plt.scatter(x, y)
+    plt.xlabel('Area')
     plt.ylabel('Price of house')
-    print(model.w.shape)
-    new_df = [x, pd.DataFrame(model.w.reshape(1, model.w.shape[0]), columns=x.columns)]
-    new_df = pd.concat(new_df, ignore_index=True)
-
-    pca_weights = pca.fit_transform(new_df)[x.shape[0]]
-    abline(pca_weights[0], model.b)
+    abline(model.w, model.b)
     plt.show()
 
 
@@ -154,19 +127,23 @@ def r_squared_score(y, outputs):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('Housing.csv')
+    data = pd.read_csv('housing.csv')
 
-    y = data['price']
-    x = data.drop(['price'], axis=1)
-    preprocessed_x = pre_processing_of_data(x)
+    y = normalize(data, columns=['price'])['price']
+    x = pd.DataFrame(data['area'])
+    preprocessed_x = pre_processing_of_data(x, 'area', 2)
 
-    epochs = 3000
-    model = Model(input_size=14)
+    epochs = 500
+    model = Model(input_size=3)
 
     for i in range(epochs):
         outputs = model.predict(preprocessed_x)
         cost = calculate_cost(y, outputs)
+        if i % 100 == 0:
+            print(i, cost)
         model.optimize(preprocessed_x, y, outputs)
 
     print('R-Squared score: ', r_squared_score(y, outputs))
-    plot_line_2d_using_pca(preprocessed_x, y, model)
+    print(y)
+    print(preprocessed_x['area'])
+    plot_line(preprocessed_x['area'], y, model)
