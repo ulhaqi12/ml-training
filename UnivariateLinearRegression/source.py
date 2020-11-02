@@ -87,7 +87,7 @@ def abline(slope, intercept):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('housing.csv')
+    data = pd.read_csv('../housing.csv')
 
     x = data['area']
     y = data['price']

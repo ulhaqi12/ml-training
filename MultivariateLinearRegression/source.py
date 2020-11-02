@@ -129,7 +129,6 @@ def plot_line_2d_using_pca(x, y, model):
     plt.scatter(pca_data, y)
     plt.xlabel('14 different features converted to 1D using PCA')
     plt.ylabel('Price of house')
-    print(model.w.shape)
     new_df = [x, pd.DataFrame(model.w.reshape(1, model.w.shape[0]), columns=x.columns)]
     new_df = pd.concat(new_df, ignore_index=True)
 
@@ -154,13 +153,13 @@ def r_squared_score(y, outputs):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('Housing.csv')
+    data = pd.read_csv('../housing_complete.csv')
 
     y = data['price']
     x = data.drop(['price'], axis=1)
     preprocessed_x = pre_processing_of_data(x)
 
-    epochs = 3000
+    epochs = 500
     model = Model(input_size=14)
 
     for i in range(epochs):
