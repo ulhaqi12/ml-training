@@ -36,8 +36,8 @@ class Model:
         :return:
         """
 
-        lambda_value = 0.5
-        lambda_vector = (np.zeros(self.w.shape) + 1) * lambda_value
+        lambda_value = 0.001
+        lambda_vector = self.w * (2 * lambda_value)
         self.b = self.b - (learning_rate * (np.sum(outputs - y)/len(y)))
         self.w = self.w - (learning_rate * ((np.matmul(x.to_numpy().T, outputs - y)/len(y)).reshape(x.shape[1], 1) + lambda_vector))
 
@@ -51,7 +51,7 @@ def calculate_cost(y, output, model):
     """
 
     lambda_ = 0.5
-    cost = np.sum(np.square(output - y))/(2 * len(y)) + (lambda_ * np.sum(np.abs(model.w)))
+    cost = np.sum(np.square(output - y))/(2 * len(y)) + (lambda_ * np.sum(np.square(model.w)))
     return cost
 
 
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     x = data.drop(['price'], axis=1)
     preprocessed_x = pre_processing_of_data(x)
 
-    epochs = 500
+    epochs = 3000
     model = Model(input_size=14)
 
     for i in range(epochs):
