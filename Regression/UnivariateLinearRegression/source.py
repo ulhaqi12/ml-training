@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 
 class Model:
@@ -100,6 +101,7 @@ if __name__ == '__main__':
     # normalization
     norm_x = normalize_input(x)
     norm_y = normalize_input(y)
+    print(norm_x)
 
     plt.scatter(norm_x, norm_y)
     plt.xlabel('Size')

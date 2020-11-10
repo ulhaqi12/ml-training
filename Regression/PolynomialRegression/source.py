@@ -126,13 +126,13 @@ def r_squared_score(y, outputs):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('housing.csv')
+    data = pd.read_csv('../housing.csv')
 
     y = normalize(data, columns=['price'])['price']
     x = pd.DataFrame(data['area'])
     preprocessed_x = pre_processing_of_data(x, 'area', 2)
 
-    epochs = 500
+    epochs = 300
     model = Model(input_size=3)
 
     for i in range(epochs):
