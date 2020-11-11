@@ -1,8 +1,8 @@
-import sys
-from math import sqrt, pi, exp
+from math import pi
 
 import pandas as pd
 import numpy as np
+from sklearn.naive_bayes import GaussianNB
 
 
 class GaussianNaiveBayes:
@@ -127,4 +127,9 @@ if __name__ == '__main__':
     model = GaussianNaiveBayes()
     model.fit(train_x, train_y)
     output = model.predict(test_x)
-    print('Test Accuracy:', calculate_accuracy(output, test_y['Gender']) * 100)
+    print('Test Accuracy by my model: ', calculate_accuracy(output, test_y['Gender']) * 100)
+
+    sk_nb = GaussianNB()
+    sk_nb.fit(train_x.to_numpy(), np.array(train_y, dtype=np.float64))
+    output_sk = sk_nb.predict(test_x.to_numpy())
+    print("Test accuracy in sklearn: ", calculate_accuracy(output_sk, test_y['Gender']) * 100)
