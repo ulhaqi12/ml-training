@@ -1,4 +1,5 @@
 from math import pi
+import time
 
 import pandas as pd
 import numpy as np
@@ -124,12 +125,20 @@ if __name__ == '__main__':
 
     train_x, train_y, test_x, test_y = train_test_split(preprocessed_data, 0.95)
 
+    start_time = time.time()
     model = GaussianNaiveBayes()
     model.fit(train_x, train_y)
     output = model.predict(test_x)
-    print('Test Accuracy by my model: ', calculate_accuracy(output, test_y['Gender']) * 100)
+    end_time = time.time()
+    print('Test Accuracy by my model: ', calculate_accuracy(output, test_y['Gender']) * 100, 'in',
+          (end_time - start_time) * 1000, 'ms')
 
+    start_time = time.time()
     sk_nb = GaussianNB()
     sk_nb.fit(train_x.to_numpy(), np.array(train_y, dtype=np.float64))
     output_sk = sk_nb.predict(test_x.to_numpy())
-    print("Test accuracy in sklearn: ", calculate_accuracy(output_sk, test_y['Gender']) * 100)
+    end_time = time.time()
+    print("Test accuracy in sklearn: ", calculate_accuracy(output_sk, test_y['Gender']) * 100, 'in',
+          (end_time - start_time) * 1000, 'ms')
+
+    print('Time shows that its better to use library always xD.')
