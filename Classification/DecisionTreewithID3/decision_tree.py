@@ -7,15 +7,17 @@ class TreeNode:
     class that will represent one node of decision tree
     """
 
-    def __init__(self):
+    def __init__(self, dividing_by='', class_name=None, feature_value='', children=[], data=None, Y=None):
         """
         constructor to create one Node of tree
         """
 
-        self.dividing_by = ''
-        self.class_name = ''
-        self.feature_value = ''
-        self.children = []
+        self.dividing_by = dividing_by
+        self.class_name = class_name
+        self.feature_value = feature_value
+        self.children = children
+        self.data = data
+        self.output = Y
 
 
 class DecisionTreeClassifier:
@@ -25,10 +27,10 @@ class DecisionTreeClassifier:
 
     def __init__(self):
         """
-        constructor to create Tree
+        constructor to create Decision Tree model
         """
 
-        self.root = TreeNode()
+        self.root = None
 
     @staticmethod
     def calculate_entropy(X, Y):
@@ -71,8 +73,8 @@ class DecisionTreeClassifier:
     def get_best_feature_for_division(self, X, Y):
         """
         function that will return feature name having highest Information Gain.
-        :param X:
-        :param Y:
+        :param X: input data
+        :param Y: expected output
         :return:
         """
         features = X.columns
@@ -85,13 +87,63 @@ class DecisionTreeClassifier:
     def fit(self, X, Y):
         """
         function that will create a decision tree based on given training data
-        :param X:
-        :param Y:
+        :param X: input data
+        :param Y: expected output
         :return:
         """
 
-        best_feature = self.get_best_feature_for_division(X, Y)
-        print(best_feature)
+        self.root = TreeNode(children=[])
+        self.root.data = X
+        self.root.output = Y
+        pending_nodes = [self.root]
+        while len(pending_nodes) != 0:
+            node = pending_nodes.pop(0)
+            best_feature = self.get_best_feature_for_division(node.data, node.output)
+            best_feature_values = node.data[best_feature].unique()
+            if node.class_name:
+                continue
+            node.dividing_by = best_feature
+            for feature_value in best_feature_values:
+                new_node = TreeNode(children=[])
+                new_node.feature_value = feature_value
+                new_node.data = node.data[node.data[best_feature] == feature_value]
+                new_node.output = node.output[node.data[best_feature] == feature_value]
+                node.children.append(new_node)
+                if len(set(new_node.output)) == 1:
+                    new_node.class_name = new_node.output.unique()[0]
+                    new_node.children = None
+                else:
+                    pending_nodes.append(new_node)
+
+    def predict(self, X):
+        """
+        function that will use trained decision tree to predict output for new example
+        :param X: input data
+        :return:
+        """
+
+        output = None
+        node = self.root
+        counter = 0
+        while output is None:
+            if node.class_name:
+                return node.class_name
+            root_feature = X[node.dividing_by]
+            for child in node.children:
+                if child.feature_value == root_feature:
+                    node = child
+            counter += 1
+            if counter ==3:
+                break
+
+    def print_tree(self, node):
+        if node.class_name:
+            return
+        else:
+            print(node.dividing_by)
+            print([node.feature_value for node in node.children])
+            for child in node.children:
+                self.print_tree(child)
 
 
 if __name__ == '__main__':
@@ -102,3 +154,7 @@ if __name__ == '__main__':
 
     model = DecisionTreeClassifier()
     model.fit(x, y)
+
+    print(x.loc[0])
+    print('Expected output', y.loc[0])
+    print('Predicted output', model.predict(x.loc[0]))
